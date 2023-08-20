@@ -1,24 +1,42 @@
-//import { Formik, Field, Form } from 'formik';
+import { Component } from 'react';
 import { ImSearch } from 'react-icons/im';
+import toast from 'react-hot-toast';
+import { FormStyled, ButtonStyled, InputStyled } from './Searchbar.styled';
 
-export const Searchbar = ({ onFormSubmit }) => {
-  return (
-    <form
-      onSubmit={evt => {
-        evt.preventDefault();
-        onFormSubmit(evt.target.elements.query.value);
-        evt.target.reset();
-      }}
-    >
-      <button type="submit">
-        <ImSearch></ImSearch>
-      </button>
-      <input
-        id="text"
-        name="query"
-        type="text"
-        placeholder="Search images and photos"
-      />
-    </form>
-  );
-};
+export class Searchbar extends Component {
+  state = {
+    query: '',
+  };
+  handleQueryChange = evt => {
+    this.setState({ query: evt.currentTarget.value.toLowerCase() });
+  };
+
+  handleSubmit = evt => {
+    evt.preventDefault();
+
+    if (this.state.query.trim() === '') {
+      toast.error('Input query');
+      return;
+    }
+    this.props.onFormSubmit(this.state.query);
+    this.setState({ query: '' });
+  };
+  render() {
+    return (
+      <FormStyled onSubmit={this.handleSubmit}>
+        <ButtonStyled type="submit">
+          <ImSearch></ImSearch>
+        </ButtonStyled>
+        <InputStyled
+          type="text"
+          name="query"
+          value={this.state.query}
+          //autocomplete="off"
+          //autofocus
+          placeholder="Search images and photos"
+          onChange={this.handleQueryChange}
+        />
+      </FormStyled>
+    );
+  }
+}
