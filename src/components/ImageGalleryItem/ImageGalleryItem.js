@@ -32,7 +32,7 @@ export class ImageGalleryItem extends Component {
         <ImageModal
           isModalOpen={this.state.isModalOpen}
           onClose={this.closeModal}
-          customStyles={this.customStyles}
+          customStyles={customStyles}
           src={srcLarge}
           alt={alt}
         />
