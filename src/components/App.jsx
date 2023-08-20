@@ -5,6 +5,7 @@ import { Searchbar } from './Searchbar/Searchbar';
 import { GlobalStyle } from './GlobalStyled';
 import { Layout } from './Layout.js';
 import { BtnLoadMore } from './ButtonLoadMore/ButtonLoadMore';
+import { Loader } from './Loader/Loader';
 
 export class App extends Component {
   state = {
@@ -22,10 +23,10 @@ export class App extends Component {
     });
   };
 
-  handleLoadMore = newImages => {
+  handleLoadMore = images => {
     this.setState(prevState => ({
       page: prevState.page + 1,
-      images: [...prevState.images, newImages],
+      images: [...prevState.images, images],
     }));
   };
 
@@ -37,7 +38,7 @@ export class App extends Component {
           query={this.state.query}
           page={this.state.page}
         ></ImageGallery>
-
+        <Loader />
         <BtnLoadMore onClick={this.handleLoadMore}></BtnLoadMore>
 
         <Toaster autoClose={3000} />
