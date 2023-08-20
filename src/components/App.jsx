@@ -13,14 +13,6 @@ export class App extends Component {
     page: 1,
   };
 
-  //componentDidUpdate(prevProps, prevState) {
-  //  if (
-  //    prevState.query !== this.state.query ||
-  //    prevState.page !== this.state.page
-  //  ) {
-  //  }
-  //}
-
   handleFormSubmit = newQuery => {
     console.log(newQuery);
     this.setState({
@@ -30,8 +22,11 @@ export class App extends Component {
     });
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  handleLoadMore = newImages => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+      images: [...prevState.images, newImages],
+    }));
   };
 
   render() {
@@ -43,10 +38,7 @@ export class App extends Component {
           page={this.state.page}
         ></ImageGallery>
 
-        <BtnLoadMore
-          onClick={this.handleLoadMore}
-          page={this.state.page}
-        ></BtnLoadMore>
+        <BtnLoadMore onClick={this.handleLoadMore}></BtnLoadMore>
 
         <Toaster autoClose={3000} />
         <GlobalStyle />

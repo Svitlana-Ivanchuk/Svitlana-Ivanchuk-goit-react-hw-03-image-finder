@@ -5,7 +5,7 @@ import { ImageGalleryStyled } from './ImageGallery.styled';
 
 export class ImageGallery extends Component {
   state = {
-    gallery: null,
+    images: [],
     error: null,
     status: 'idle',
   };
@@ -15,23 +15,28 @@ export class ImageGallery extends Component {
     const prevQuery = prevProps.query;
     const nextPage = this.props.page;
     console.log(nextPage);
-    if (prevQuery !== nextQuery || prevQuery === null) {
+    if (
+      prevQuery !== nextQuery ||
+      prevQuery === null ||
+      prevProps.page !== nextPage
+    ) {
       this.setState({ status: 'pending' });
       fetch(
         `https://pixabay.com/api/?q=${nextQuery}&page=${nextPage}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
       )
         .then(resp => {
-          if (!resp.ok) {
-            return Promise.reject(new Error(`no match ${nextQuery}`));
+          if (resp.ok) {
+            return resp.json();
           }
-          return resp.json();
+
+          return Promise.reject(new Error(`no match ${nextQuery}`));
         })
-        .then(gallery => this.setState({ gallery, status: 'resolved' }))
+        .then(images => this.setState({ images, status: 'resolved' }))
         .catch(error => this.setState({ error, status: 'rejected' }));
     }
   }
   render() {
-    const { gallery, status, error } = this.state;
+    const { images, status, error } = this.state;
     if (status === 'idle') {
       return <div></div>;
     }
@@ -45,10 +50,11 @@ export class ImageGallery extends Component {
     if (status === 'resolved') {
       return (
         <ImageGalleryStyled>
-          {gallery.hits.map(({ webformatURL, tags, id }) => (
+          {images.hits.map(({ webformatURL, tags, id, largeImageURL }) => (
             <ImageGalleryItem
               key={id}
-              src={webformatURL}
+              srcWeb={webformatURL}
+              srcLarge={largeImageURL}
               alt={tags}
             ></ImageGalleryItem>
           ))}
