@@ -23,10 +23,10 @@ export class App extends Component {
     });
   };
 
-  handleLoadMore = images => {
+  handleLoadMore = newImages => {
     this.setState(prevState => ({
       page: prevState.page + 1,
-      images: [...prevState.images, images],
+      images: [...prevState.images, newImages],
     }));
   };
 
