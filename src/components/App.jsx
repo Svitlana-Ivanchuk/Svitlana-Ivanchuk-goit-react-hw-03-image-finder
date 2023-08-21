@@ -13,7 +13,7 @@ export class App extends Component {
     images: [],
     query: '',
     page: 1,
-    error: null,
+    error: '',
     isLoading: false,
   };
 
@@ -34,7 +34,6 @@ export class App extends Component {
     const nextQuery = this.state.query;
     const nextPage = this.state.page;
     const dataImages = await fetchApi(nextQuery, nextPage);
-    const { images } = this.state;
     this.totalImages = dataImages.total;
     const imagesHits = dataImages.hits;
 
@@ -43,10 +42,17 @@ export class App extends Component {
         'No results were found for your search, please try something else.'
       );
     }
-    this.setState(prevState => ({
-      images: [...prevState.images, ...imagesHits],
-      isLoading: false,
-    }));
+
+    try {
+      this.setState(prevState => ({
+        images: [...prevState.images, ...imagesHits],
+        isLoading: false,
+      }));
+    } catch {
+      this.setState({ error: true });
+    } finally {
+      this.setState({ loading: false });
+    }
   };
 
   handleFormSubmit = newQuery => {
@@ -65,9 +71,6 @@ export class App extends Component {
 
   render() {
     const { images, error, isLoading } = this.state;
-    console.log(this.totalImages);
-
-    console.log(this.state.page);
 
     return (
       <Layout>
@@ -80,6 +83,10 @@ export class App extends Component {
         )}
         <Toaster autoClose={3000} />
         <GlobalStyle />
+        {error &&
+          toast.error(
+            'Something happened. Please refresh the page and try again.'
+          )}
       </Layout>
     );
   }
