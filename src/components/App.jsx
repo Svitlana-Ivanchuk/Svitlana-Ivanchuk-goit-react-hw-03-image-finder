@@ -4,18 +4,15 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Searchbar } from './Searchbar/Searchbar';
 import { GlobalStyle } from './GlobalStyled';
 import { Layout } from './Layout.js';
-import { BtnLoadMore } from './ButtonLoadMore/ButtonLoadMore';
-import { Loader } from './Loader/Loader';
 
 export class App extends Component {
   state = {
-    query: '',
     images: [],
+    query: '',
     page: 1,
   };
 
   handleFormSubmit = newQuery => {
-    console.log(newQuery);
     this.setState({
       query: newQuery,
       images: [],
@@ -23,23 +20,25 @@ export class App extends Component {
     });
   };
 
-  handleLoadMore = newImages => {
+  handleLoadMore = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
-      images: [...prevState.images, newImages],
     }));
   };
 
   render() {
+    const { images, query, page } = this.state;
+
     return (
       <Layout>
         <Searchbar onFormSubmit={this.handleFormSubmit}></Searchbar>
+
         <ImageGallery
-          query={this.state.query}
-          page={this.state.page}
+          query={query}
+          page={page}
+          images={images}
+          onBtnLoadMoreClick={this.handleLoadMore}
         ></ImageGallery>
-        <Loader />
-        <BtnLoadMore onClick={this.handleLoadMore}></BtnLoadMore>
 
         <Toaster autoClose={3000} />
         <GlobalStyle />

@@ -1,47 +1,54 @@
-//import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Component } from 'react';
+import toast from 'react-hot-toast';
 import { ImageGalleryStyled } from './ImageGallery.styled';
+import { Loader } from 'components/Loader/Loader';
+import { fetchApi } from '../Api';
+import { BtnLoadMore } from '../ButtonLoadMore/ButtonLoadMore';
 
 export class ImageGallery extends Component {
   state = {
     images: [],
     error: null,
     status: 'idle',
+    isLoading: false,
   };
-  componentDidUpdate(prevProps, prevState) {
-    const API_KEY = '38162173-e7189c612242127d8d754fc70';
+
+  totalImages = null;
+
+  async componentDidUpdate(prevProps, prevState) {
     const nextQuery = this.props.query;
     const prevQuery = prevProps.query;
     const nextPage = this.props.page;
-    console.log(nextPage);
-    if (
-      prevQuery !== nextQuery ||
-      prevQuery === null ||
-      prevProps.page !== nextPage
-    ) {
-      this.setState({ status: 'pending' });
-      fetch(
-        `https://pixabay.com/api/?q=${nextQuery}&page=${nextPage}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
-      )
-        .then(resp => {
-          if (resp.ok) {
-            return resp.json();
-          }
 
-          return Promise.reject(new Error(`no match ${nextQuery}`));
-        })
-        .then(images => this.setState({ images, status: 'resolved' }))
-        .catch(error => this.setState({ error, status: 'rejected' }));
+    if (prevQuery !== nextQuery || prevProps.page !== nextPage) {
+      this.setState({ status: 'pending' });
+
+      const dataImages = await fetchApi(nextQuery, nextPage);
+
+      this.totalImages = dataImages.total;
+      const imagesHits = dataImages.hits;
+
+      if (!imagesHits.length) {
+        toast.error(
+          'No results were found for your search, please try something else.'
+        );
+      }
+      this.setState(prevState => ({
+        images: [...prevState.images, ...imagesHits],
+        status: 'resolved',
+      }));
     }
   }
+
   render() {
-    const { images, status, error } = this.state;
+    const { images, status, error, isLoading } = this.state;
+
     if (status === 'idle') {
       return <div></div>;
     }
     if (status === 'pending') {
-      return <div>Loading...</div>;
+      return <Loader />;
     }
     if (status === 'rejected') {
       return <div>{error.message}</div>;
@@ -49,16 +56,23 @@ export class ImageGallery extends Component {
 
     if (status === 'resolved') {
       return (
-        <ImageGalleryStyled>
-          {images.hits.map(({ webformatURL, tags, id, largeImageURL }) => (
-            <ImageGalleryItem
-              key={id}
-              srcWeb={webformatURL}
-              srcLarge={largeImageURL}
-              alt={tags}
-            ></ImageGalleryItem>
-          ))}
-        </ImageGalleryStyled>
+        <>
+          <ImageGalleryStyled>
+            {images.length > 0 &&
+              images.map(({ webformatURL, tags, id, largeImageURL }) => (
+                <ImageGalleryItem
+                  key={id}
+                  srcWeb={webformatURL}
+                  srcLarge={largeImageURL}
+                  alt={tags}
+                ></ImageGalleryItem>
+              ))}
+          </ImageGalleryStyled>
+          {isLoading && <Loader />}
+          {images.length > 0 && images.length !== this.totalImages && (
+            <BtnLoadMore onClick={this.props.onBtnLoadMoreClick}></BtnLoadMore>
+          )}
+        </>
       );
     }
   }
